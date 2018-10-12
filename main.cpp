@@ -1,5 +1,5 @@
 //Using SDL and standard IO
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 // Screen dimension constants
 const int SCREEN_WIDTH = 640;
@@ -15,10 +15,14 @@ int main(int argc, char *args[]) {
                                   SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if (window == nullptr) { printf("Window could not be created! SDL_Error: %s\n", SDL_GetError()); }
         else {
+            SDL_SetWindowTitle(window, "RPG Game with SDL2");
             screenSurface = SDL_GetWindowSurface(window);
             SDL_FillRect(screenSurface, nullptr, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
             SDL_UpdateWindowSurface(window);
-            SDL_Delay(10000);
+            for (int i = 0; i < 10; i++) {
+                SDL_PumpEvents();
+                SDL_Delay(1000);
+            }
         }
     }
 }
