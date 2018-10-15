@@ -6,6 +6,7 @@
 #define RPG_SDL2_TEXTURE_H
 
 #include <SDL_render.h>
+#include <SDL_image.h>
 #include <string>
 
 struct SurfaceCreationException : public std::exception {
