@@ -2,62 +2,48 @@
 #include <SDL.h>
 
 #include "KeyboardInputHandler.h"
-
-// Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-
-void handle_keyboard_event(const SDL_Event &event);
+#include "World.h"
+#include "Texture.h"
 
 int main(int argc, char *args[]) {
-    SDL_Window *window = nullptr;
-    SDL_Surface *screenSurface = nullptr;
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) { printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError()); }
-    else {
-        window = SDL_CreateWindow("SDL Tutorial", 0, 0, SCREEN_WIDTH,
-                                  SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    auto *world = new World();
+    auto test_texture = new Texture(world->get_renderer(), "../resources/zelda.png", 1126, 2000);
+    SDL_Event event;
+    KeyboardInputHandler keyboardInputHandler;
 
-        if (window == nullptr) { printf("Window could not be created! SDL_Error: %s\n", SDL_GetError()); }
-        else {
-            SDL_SetWindowTitle(window, "RPG Game with SDL2");
-            screenSurface = SDL_GetWindowSurface(window);
-            SDL_FillRect(screenSurface, nullptr, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-            SDL_UpdateWindowSurface(window);
+    while (!world->should_quit) {
+        keyboardInputHandler.beginNewFrame();
+        test_texture->render(world->get_renderer(), 0, 0, nullptr);
+        SDL_RenderPresent(world->get_renderer());
+        SDL_Delay(16);
 
-            SDL_Event event;
-            KeyboardInputHandler keyboardInputHandler;
-            int quit = false;
+        while (SDL_PollEvent(&event)) {
+            SDL_PumpEvents();
 
-            while (!quit) {
-                keyboardInputHandler.beginNewFrame();
-                SDL_Delay(16);
-                while (SDL_PollEvent(&event)) {
-                    SDL_PumpEvents();
-
-                    switch (event.type) {
-                        case SDL_KEYDOWN:
-                            if (event.key.repeat == 0) {
-                                keyboardInputHandler.keyDownEvent(event);
-                            }
-                            break;
-                        case SDL_KEYUP:
-                            keyboardInputHandler.keyUpEvent(event);
-                            break;
-                        case SDL_QUIT:
-                            quit = true;
-                            break;
+            switch (event.type) {
+                case SDL_KEYDOWN:
+                    if (event.key.repeat == 0) {
+                        keyboardInputHandler.keyDownEvent(event);
                     }
-                }
-
-                if (keyboardInputHandler.wasKeyPressed(SDL_SCANCODE_RETURN)) {
-                    printf("Enter Key was pressed!");
-                }
+                    break;
+                case SDL_KEYUP:
+                    keyboardInputHandler.keyUpEvent(event);
+                    break;
+                case SDL_QUIT:
+                    world->should_quit = true;
+                    break;
+                default:
+                    break;
             }
+        }
 
-            SDL_FreeSurface(screenSurface);
+        if (keyboardInputHandler.wasKeyPressed(SDL_SCANCODE_RETURN)) {
+            printf("Enter Key was pressed!");
         }
     }
+
+    delete world;
 
     return 0;
 }
